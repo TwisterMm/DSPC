@@ -1,12 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
-#include "omp.h"
-#include <chrono>
-
-std::chrono::steady_clock::time_point begin;
-std::chrono::steady_clock::time_point end;
-int id, nthrds;
+#include <omp.h>
 
 class SubMatrix {
     const std::vector<std::vector<double>>* source;
@@ -78,18 +73,31 @@ public:
     }
 };
 
-std::vector<double> solve(SubMatrix& matrix) {
+std::vector<double> solveParallel(SubMatrix& matrix) {
     double det = matrix.det();
     if (det == 0.0) {
         throw std::runtime_error("The determinant is zero.");
     }
 
     std::vector<double> answer(matrix.size());
-#pragma omp parallel
-    {
-        id = omp_get_thread_num();
-        matrix.columnIndex(id);
-        answer[id] = matrix.det() / det;
+#pragma omp parallel for collapse(2) shared(matrix)
+    for (int i = 0; i < matrix.size(); ++i) {
+        matrix.columnIndex(i);
+        answer[i] = matrix.det() / det;
+    }
+    return answer;
+}
+
+std::vector<double> solveSerial(SubMatrix& matrix) {
+    double det = matrix.det();
+    if (det == 0.0) {
+        throw std::runtime_error("The determinant is zero.");
+    }
+
+    std::vector<double> answer(matrix.size());
+    for (int i = 0; i < matrix.size(); ++i) {
+        matrix.columnIndex(i);
+        answer[i] = matrix.det() / det;
     }
     return answer;
 }
@@ -102,23 +110,48 @@ std::vector<double> solveCramer(const std::vector<std::vector<double>>& equation
     )) {
         throw std::runtime_error("Each equation must have the expected size.");
     }
-    omp_set_num_threads(size);
+
     std::vector<std::vector<double>> matrix(size);
     std::vector<double> column(size);
-    begin = std::chrono::steady_clock::now();
-#pragma omp parallel
-    {
-        id = omp_get_thread_num();
-        column[id] = equations[id][size];
-        matrix[id].resize(size);
+#pragma omp parallel for collapse(2) shared(matrix)
+    for (int r = 0; r < size; ++r) {
+        column[r] = equations[r][size];
+        matrix[r].resize(size);
         for (int c = 0; c < size; ++c) {
-            matrix[id][c] = equations[id][c];
+            matrix[r][c] = equations[r][c];
         }
     }
+
     SubMatrix sm(matrix, column);
-    
-    return solve(sm);
+    return solveParallel(sm);
 }
+
+
+
+std::vector<double> solveCramerSerial(const std::vector<std::vector<double>>& equations) {
+    int size = equations.size();
+    if (std::any_of(
+        equations.cbegin(), equations.cend(),
+        [size](const std::vector<double>& a) { return a.size() != size + 1; }
+    )) {
+        throw std::runtime_error("Each equation must have the expected size.");
+    }
+
+    std::vector<std::vector<double>> matrix(size);
+    std::vector<double> column(size);
+    for (int r = 0; r < size; ++r) {
+        column[r] = equations[r][size];
+        matrix[r].resize(size);
+        for (int c = 0; c < size; ++c) {
+            matrix[r][c] = equations[r][c];
+        }
+    }
+
+    SubMatrix sm(matrix, column);
+    return solveSerial(sm);
+}
+
+
 
 template<typename T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
@@ -137,6 +170,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
 }
 
 int main() {
+    double start_time, end_time;
     std::vector<std::vector<double>> equations = {
         { 2, -1,  5,  1,  -3},
         { 3,  2,  2, -6, -32},
@@ -144,9 +178,20 @@ int main() {
         { 5, -2, -3,  3,  49},
     };
 
+    start_time = omp_get_wtime();
     auto solution = solveCramer(equations);
-    end = std::chrono::steady_clock::now();
-    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " micro seconds" << std::endl;
+    end_time = omp_get_wtime() - start_time;
+
+
+
+    std::cout << "Parallel time taken in seconds: " << end_time << "s\n";
+    std::cout << solution << '\n';
+
+    start_time = omp_get_wtime();
+    solution = solveCramerSerial(equations);
+    end_time = omp_get_wtime() - start_time;
+
+    std::cout << "Serial time taken in seconds: " << end_time << "s\n";
     std::cout << solution << '\n';
 
     return 0;
