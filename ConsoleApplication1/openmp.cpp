@@ -80,6 +80,7 @@ std::vector<double> solve(SubMatrix& matrix) {
     }
 
     std::vector<double> answer(matrix.size());
+
     for (int i = 0; i < matrix.size(); ++i) {
         matrix.columnIndex(i);
         answer[i] = matrix.det() / det;

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleApplication1", "ConsoleApplication1\ConsoleApplication1.vcxproj", "{B9990D17-C7B8-4343-A39F-B35DB9956667}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenMP", "ConsoleApplication1\ConsoleApplication1.vcxproj", "{B9990D17-C7B8-4343-A39F-B35DB9956667}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MPI", "..\MPI\MPI\MPI.vcxproj", "{C5279FCC-B5D3-4F57-B04E-662104E53B7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,14 @@ Global
 		{B9990D17-C7B8-4343-A39F-B35DB9956667}.Release|x64.Build.0 = Release|x64
 		{B9990D17-C7B8-4343-A39F-B35DB9956667}.Release|x86.ActiveCfg = Release|Win32
 		{B9990D17-C7B8-4343-A39F-B35DB9956667}.Release|x86.Build.0 = Release|Win32
+		{C5279FCC-B5D3-4F57-B04E-662104E53B7D}.Debug|x64.ActiveCfg = Debug|x64
+		{C5279FCC-B5D3-4F57-B04E-662104E53B7D}.Debug|x64.Build.0 = Debug|x64
+		{C5279FCC-B5D3-4F57-B04E-662104E53B7D}.Debug|x86.ActiveCfg = Debug|Win32
+		{C5279FCC-B5D3-4F57-B04E-662104E53B7D}.Debug|x86.Build.0 = Debug|Win32
+		{C5279FCC-B5D3-4F57-B04E-662104E53B7D}.Release|x64.ActiveCfg = Release|x64
+		{C5279FCC-B5D3-4F57-B04E-662104E53B7D}.Release|x64.Build.0 = Release|x64
+		{C5279FCC-B5D3-4F57-B04E-662104E53B7D}.Release|x86.ActiveCfg = Release|Win32
+		{C5279FCC-B5D3-4F57-B04E-662104E53B7D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
