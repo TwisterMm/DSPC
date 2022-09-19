@@ -80,7 +80,7 @@ std::vector<double> solveParallel(SubMatrix& matrix) {
     }
 
     std::vector<double> answer(matrix.size());
-
+#pragma omp parallel for collapse(2) shared(matrix)
     for (int i = 0; i < matrix.size(); ++i) {
         matrix.columnIndex(i);
         answer[i] = matrix.det() / det;
