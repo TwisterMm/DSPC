@@ -87,12 +87,12 @@ public:
         SubMatrix m(*this);
         double det = 0.0;
         int sign = 1;
-        for (size_t c = 0; c < sz; ++c) {
+        parallel_for(size_t(0), sz, [&](size_t c) {
             m.columnIndex(c);
             double d = m.det();
             det += index(0, c) * d * sign;
             sign = -sign;
-        }
+            });
         return det;
     }
 };
