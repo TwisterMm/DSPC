@@ -89,7 +89,7 @@ public:
         int sign = 1;
         parallel_for(size_t(0), sz, [&](size_t c) {
             m.columnIndex(c);
-            double d = m.det();
+            double d = m.ParallelDet();
             det += index(0, c) * d * sign;
             sign = -sign;
             });
@@ -98,16 +98,16 @@ public:
 };
 
 std::vector<double> solveParallel(SubMatrix& matrix) {
-    double det = matrix.det();
+    double det = matrix.ParallelDet();
     if (det == 0.0) {
         throw std::runtime_error("The determinant is zero.");
     }
 
     std::vector<double> answer(matrix.size());
-    for (int i = 0; i < matrix.size(); ++i) {
+    parallel_for(size_t(0), size_t(matrix.size()), [&](size_t i) {
         matrix.columnIndex(i);
-        answer[i] = matrix.det() / det;
-    }
+        answer[i] = matrix.ParallelDet() / det;
+        });
     return answer;
 }
 
@@ -119,7 +119,7 @@ std::vector<double> solveSerial(SubMatrix& matrix) {
     }
 
     std::vector<double> answer(matrix.size());
-    for (int i=0; i < matrix.size(); ++i) {
+    for (int i = 0; i < matrix.size(); ++i) {
         matrix.columnIndex(i);
         answer[i] = matrix.det() / det;
     }
@@ -204,7 +204,6 @@ int main() {
         auto solution = solveCramerSerial(equations);
         solution = solveCramer(equations);
     }*/
-    for (int i = 0; i < 5; i++) {
         start_time = omp_get_wtime();
         auto solution = solveCramerSerial(equations);
         end_time = omp_get_wtime() - start_time;
@@ -220,6 +219,6 @@ int main() {
 
         std::cout << "Parallel time taken in seconds: " << end_time << "s\n";
         std::cout << solution << '\n';
-    }
+    
     return 0;
 }
