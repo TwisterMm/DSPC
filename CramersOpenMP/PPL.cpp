@@ -3,6 +3,8 @@
 #include <vector>
 #include <omp.h>
 #include <ppl.h>
+#include <concurrent_vector.h> //include concurrent vector
+#include <tuple> //include tuple
 
 using namespace std;
 using namespace concurrency;
@@ -87,9 +89,14 @@ public:
         SubMatrix m(*this);
         double det = 0.0;
         int sign = 1;
-        parallel_for(size_t(0), sz, [&](size_t c) {
+
+        concurrent_vector<tuple<SubMatrix, double>> submatrix;
+
+
+
+        parallel_for_each(size_t(0), sz, [&](size_t c) {
             m.columnIndex(c);
-            double d = m.det();
+            double d = m.ParallelDet();
             det += index(0, c) * d * sign;
             sign = -sign;
             });
@@ -98,15 +105,17 @@ public:
 };
 
 std::vector<double> solveParallel(SubMatrix& matrix) {
-    double det = matrix.det();
+    double det = matrix.ParallelDet();
     if (det == 0.0) {
         throw std::runtime_error("The determinant is zero.");
     }
 
+    
+
     std::vector<double> answer(matrix.size());
     for (int i = 0; i < matrix.size(); ++i) {
         matrix.columnIndex(i);
-        answer[i] = matrix.det() / det;
+        answer[i] = matrix.ParallelDet() / det;
     }
     return answer;
 }
