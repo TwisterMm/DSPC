@@ -1,3 +1,4 @@
+
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -5,7 +6,6 @@
 #include <mpi.h>
 
 int world_rank, world_size = 0;
-
 class SubMatrix {
     const std::vector<std::vector<double>>* source;
     std::vector<double> replaceColumn;
@@ -127,6 +127,14 @@ std::vector<double> solveSerial(SubMatrix& matrix) {
 }
 
 std::vector<double> solveCramer(const std::vector<std::vector<double>>& equations) {
+    MPI_Init(NULL, NULL);
+
+    //Get process ID
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+    //Get processes Number
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    MPI_Status status;
     int size = equations.size();
     if (std::any_of(
         equations.cbegin(), equations.cend(),
@@ -137,15 +145,45 @@ std::vector<double> solveCramer(const std::vector<std::vector<double>>& equation
 
     std::vector<std::vector<double>> matrix(size);
     std::vector<double> column(size);
-    for (int r = world_rank; r < size; r+=world_size) {
-        column[r] = equations[r][size];
-        matrix[r].resize(size);
-        for (int c = 0; c < size; ++c) {
-            matrix[r][c] = equations[r][c];
-        }
+    if (world_rank == 0)
+    {
+        // Rank 0 send each row consists of 4 elements to respective thread
+        for (int i = 0; i < world_size-1; i++)
+            MPI_Send(&equations[i], 4, MPI_INT, i+1, i+1, MPI_COMM_WORLD);
     }
-    SubMatrix sm(matrix, column);
-    return solveSerial(sm);
+    else
+    {
+        //declare a 2d array with 1 row 4 elements
+        int equation[1][4];
+        // Rank other than 0 receive the respective row according to their rank
+        MPI_Recv(&equation[world_rank], 4, MPI_INT, world_rank, world_rank, MPI_COMM_WORLD, &status);
+
+            column[world_rank] = equation[world_rank][size];
+            matrix[world_rank].resize(size);
+            for (int c = 0; c < size; ++c) {
+                matrix[world_rank][c] = equation[world_rank][c];
+            }
+        // Rank other than 0 send the column and matrix back to Rank 0
+            MPI_Send(&column[world_rank], 1, MPI_INT, 0, world_rank + world_size, MPI_COMM_WORLD);
+            MPI_Send(&matrix[world_rank], 4, MPI_INT, 0, world_rank + 2*(world_size), MPI_COMM_WORLD);
+
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (world_rank == 0)
+    {
+        // Rank 0 receive matrix and column from each rank
+        for (int i = 0; i < world_size-1; i++)
+        {
+            MPI_Recv(&column[i], 1, MPI_INT, i + 1, i + 1 + world_size, MPI_COMM_WORLD, &status);
+            MPI_Recv(&matrix[i], 4, MPI_INT, i + 1, i + 1 + 2*(world_size), MPI_COMM_WORLD, &status);
+        }
+        SubMatrix sm(matrix, column);
+        fflush(stdout);
+        return solveSerial(sm);
+    }
+    
+    //return solveSerial(sm)
+    
 }
 
 
@@ -161,6 +199,7 @@ std::vector<double> solveCramerSerial(const std::vector<std::vector<double>>& eq
 
     std::vector<std::vector<double>> matrix(size);
     std::vector<double> column(size);
+
     for (int r = 0; r < size; ++r) {
         column[r] = equations[r][size];
         matrix[r].resize(size);
@@ -168,7 +207,7 @@ std::vector<double> solveCramerSerial(const std::vector<std::vector<double>>& eq
             matrix[r][c] = equations[r][c];
         }
     }
-
+    
     SubMatrix sm(matrix, column);
     return solveSerial(sm);
 }
@@ -200,10 +239,6 @@ int main(int argc, char* argv[]) {
         { 5, -2, -3,  3,  49},
     };
 
-    /*for (int i = 0; i < 1000; i++){
-        auto solution = solveCramerSerial(equations);
-        solution = solveCramer(equations);
-    }*/
     start_time = omp_get_wtime();
     auto solution = solveCramerSerial(equations);
     end_time = omp_get_wtime() - start_time;
@@ -213,17 +248,10 @@ int main(int argc, char* argv[]) {
     std::cout << "Serial time taken in seconds: " << end_time << "s\n";
     std::cout << solution << '\n';
 
-    MPI_Init(&argc, &argv);
-
-    //Get process ID
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-
-    //Get processes Number
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-    start_time = MPI_Wtime();
+ 
+    start_time = omp_get_wtime();
     solution = solveCramer(equations);
-    end_time = MPI_Wtime() - start_time;
+    end_time = omp_get_wtime() - start_time;
     MPI_Finalize();
     std::cout << "Parallel MPI time taken in seconds: " << end_time << "s\n";
     std::cout << solution << '\n';
