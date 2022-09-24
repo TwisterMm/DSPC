@@ -65,14 +65,18 @@ public:
         for (size_t c = 0; c < sz; ++c) {
             m.columnIndex(c);
             double d = m.det();
+            std::cout << "\n+++++++++";
+            std::cout << "d =" << d << std::endl;
             det += index(0, c) * d * sign;
+            std::cout << "det =" << det << "\n" << std::endl;
             sign = -sign;
         }
         return det;
-    }
+    }        
 };
 
 std::vector<double> solve(SubMatrix& matrix) {
+    std::cout << "\n---------From solve---------" << std::endl;
     double det = matrix.det();
     if (det == 0.0) {
         throw std::runtime_error("The determinant is zero.");
@@ -80,8 +84,13 @@ std::vector<double> solve(SubMatrix& matrix) {
 
     std::vector<double> answer(matrix.size());
     for (int i = 0; i < matrix.size(); ++i) {
+        std::cout << "===============================";
+        std::cout << "From solve" << std::endl;
         matrix.columnIndex(i);
+        std::cout << "Dx Dy Dz=" << matrix.det() << "\n index column= " << matrix.columnIndex() << std::endl;
+        std::cout << "det value" << det << std::endl;
         answer[i] = matrix.det() / det;
+        std::cout << "answer " << i << " =" << answer[i] << "\n" << std::endl;
     }
     return answer;
 }
@@ -101,7 +110,9 @@ std::vector<double> solveCramer(const std::vector<std::vector<double>>& equation
         column[r] = equations[r][size];
         matrix[r].resize(size);
         for (int c = 0; c < size; ++c) {
-            matrix[r][c] = equations[r][c];
+            matrix[r][c] = equations[r][c];        
+            std::cout << "From solveCramer" << std::endl;
+            std::cout << "matrix " << r << " " << c << " " << matrix[r][c] <<"\n" << std::endl;
         }
     }
 

@@ -87,12 +87,21 @@ public:
         SubMatrix m(*this);
         double det = 0.0;
         int sign = 1;
+
+        MPI_Init(NULL, NULL);
+        //Get process ID
+        MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+        //Get processes Number
+        MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
         for (size_t c = 0; c < sz; ++c) {
             m.columnIndex(c);
             double d = m.det();
             det += index(0, c) * d * sign;
             sign = -sign;
         }
+
+        MPI_Finalize();
         return det;
     }
 };
@@ -178,8 +187,10 @@ std::vector<double> solveCramer(const std::vector<std::vector<double>>& equation
             MPI_Recv(&matrix[i], 4, MPI_INT, i + 1, i + 1 + 2*(world_size), MPI_COMM_WORLD, &status);
         }
         SubMatrix sm(matrix, column);
-        fflush(stdout);
+       
+        MPI_Finalize();
         return solveSerial(sm);
+        
     }
     
     //return solveSerial(sm)
@@ -211,6 +222,44 @@ std::vector<double> solveCramerSerial(const std::vector<std::vector<double>>& eq
     SubMatrix sm(matrix, column);
     return solveSerial(sm);
 }
+
+
+//std::vector<double> solveCramerMPI(const std::vector<std::vector<double>>& equations) {
+//    int size = equations.size();
+//    if (std::any_of(
+//        equations.cbegin(), equations.cend(),
+//        [size](const std::vector<double>& a) { return a.size() != size + 1; }
+//    )) {
+//        throw std::runtime_error("Each equation must have the expected size.");
+//    }
+//
+//    std::vector<std::vector<double>> matrix(size);
+//    std::vector<double> column(size);
+//
+//    int rank, size = 0;
+//    MPI_Init(NULL, NULL);
+//    //Get process ID
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//    //Get processes Number
+//    MPI_Comm_size(MPI_COMM_WORLD, &size);
+//
+//
+//
+//
+//    for (int r = 0; r < size; ++r) {
+//        column[r] = equations[r][size];
+//        matrix[r].resize(size);
+//
+//
+//        for (int c = 0; c < size; ++c) {
+//            matrix[r][c] = equations[r][c];
+//        }
+//    }
+//
+//    MPI_Finalize();
+//    SubMatrix sm(matrix, column);
+//    return solveSerial(sm);
+//}
 
 
 
@@ -252,7 +301,7 @@ int main(int argc, char* argv[]) {
     start_time = omp_get_wtime();
     solution = solveCramer(equations);
     end_time = omp_get_wtime() - start_time;
-    MPI_Finalize();
+   
     std::cout << "Parallel MPI time taken in seconds: " << end_time << "s\n";
     std::cout << solution << '\n';
     return 0;

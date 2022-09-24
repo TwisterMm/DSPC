@@ -1,12 +1,21 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <mpi.h>
 
 //code from https://codereview.stackexchange.com/questions/204135/determinant-using-gauss-elimination
 
 double determinant(std::vector<std::vector<double>>& matrix) {
     int N = static_cast<int>(matrix.size());
     double det = 1;
+
+    //MPI_Status status;
+    //MPI_Init(NULL, NULL);
+    ////Get process ID
+    //int world_rank, world_size;
+    //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    ////Get processes Number
+    //MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
     for (int i = 0; i < N; ++i) {
 
@@ -33,10 +42,43 @@ double determinant(std::vector<std::vector<double>>& matrix) {
             }
         }
     }
-
+    /*MPI_Finalize();*/
     return det;
 }
 
+
+
+
+
+std::vector<double> solveCramer(std::vector<std::vector<double>>& equations) {
+    //determinant
+    
+
+    int size = equations.size();
+
+    std::vector<std::vector<double>> matrix(size);
+    std::vector<double> column(size);
+    for (int r = 0; r < size; ++r) {
+        column[r] = equations[r][size];
+        matrix[r].resize(size);
+        for (int c = 0; c < size; ++c) {
+            matrix[r][c] = equations[r][c];
+            std::cout << matrix[r][c] << std::endl;
+        }
+    }
+
+
+    
+    
+
+    //calculate Dx,y,z
+    std::vector<double> answer(size);
+    /*for (int i = 0; i < matrix.size(); ++i) {
+        matrix.columnIndex(i);
+        answer[i] = determinant(matrix)/ det;
+    }*/
+    return answer;
+}
 
 int main() {
     std::vector<std::vector<double>> equations = {
@@ -45,5 +87,7 @@ int main() {
         { 1,  3,  3},
 
     };
-    std::cout << determinant(equations) << std::endl;
+
+    solveCramer(equations);
+    /*std::cout << determinant(equations) << std::endl;*/
 }
