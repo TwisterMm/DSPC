@@ -88,16 +88,16 @@ std::vector<double> solveParallel(SubMatrix& matrix) {
 
     std::vector<double> answer(matrix.size());
 
-    MPI_Status status;
-
+    
     //Get process ID
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     //Get processes Number
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+    
     unsigned int partition = matrix.size() / size;
 
-    for (int i = rank * partition; i < rank * partition + partition; ++i) {
+    for (int i = 0; i < rank * partition + partition; ++i) {
 
         /*std::cout << "===============================";
         std::cout << "From solve" << std::endl;*/
@@ -123,21 +123,21 @@ std::vector<double> solveCramerParallel(const std::vector<std::vector<double>>& 
 
     std::vector<std::vector<double>> matrix(size);
     std::vector<double> column(size);
-    MPI_Status status;
+    //MPI_Status status;
 
-    //Get process ID
-    int world_rank, world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-    //Get processes Number
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    unsigned int partition = size / world_size;
+    ////Get process ID
+    //int world_rank, world_size;
+    //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    ////Get processes Number
+    //MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    //unsigned int partition = size / world_size;
 
 
 
-    for (int r = world_rank * partition; r < world_rank * partition + partition; ++r) {
+    for (int r = 0; r < world_rank * partition + partition; ++r) {
         column[r] = equations[r][size];
         matrix[r].resize(size);
-        for (int c = world_rank * partition; c < world_rank * partition + partition; ++c) {
+        for (int c = 0; c < world_rank * partition + partition; ++c) {
             matrix[r][c] = equations[r][c];
             /*std::cout << "From solveCramer" << std::endl;
             std::cout << "matrix " << r << " " << c << " " << matrix[r][c] << "\n" << std::endl;*/
@@ -221,6 +221,11 @@ int main(int argc, char* argv[]) {
 
     double start_time_MPI, end_time_MPI;
     MPI_Init(&argc, &argv);
+    //Get process ID
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    //Get processes Number
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
     start_time_MPI = MPI_Wtime();
     auto solution_MPI = solveCramerParallel(equations);
     end_time_MPI = MPI_Wtime();
