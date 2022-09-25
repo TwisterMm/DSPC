@@ -25,8 +25,6 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
     return os << ']';
 }
 
-
-
 Matrix squareMatrix(size_t n) {
     Matrix m;
     for (size_t i = 0; i < n; i++) {

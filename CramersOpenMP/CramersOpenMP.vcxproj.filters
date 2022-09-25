@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="mpi_2.cpp">
+    <ClCompile Include="MPIrestructured.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
