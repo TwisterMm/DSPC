@@ -95,17 +95,11 @@ std::vector<double> solveParallel(SubMatrix& matrix) {
     //Get processes Number
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     
-    unsigned int partition = matrix.size() / size;
+    /*unsigned int partition = matrix.size() / size;*/
 
-    for (int i = 0; i < rank * partition + partition; ++i) {
-
-        /*std::cout << "===============================";
-        std::cout << "From solve" << std::endl;*/
-        matrix.columnIndex(i);
-       /* std::cout << "Dx Dy Dz=" << matrix.det() << "\n index column= " << matrix.columnIndex() << std::endl;
-        std::cout << "det value" << det << std::endl;*/
-        answer[i] = matrix.det() / det;
-        /*std::cout << "answer " << i << " =" << answer[i] << "\n" << std::endl;*/
+    for (int i = 0; i < matrix.size(); ++i) {        
+        matrix.columnIndex(i);       
+        answer[i] = matrix.det() / det;        
     }
 
 
@@ -123,27 +117,34 @@ std::vector<double> solveCramerParallel(const std::vector<std::vector<double>>& 
 
     std::vector<std::vector<double>> matrix(size);
     std::vector<double> column(size);
-    //MPI_Status status;
+    
 
-    ////Get process ID
-    //int world_rank, world_size;
-    //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-    ////Get processes Number
-    //MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    //unsigned int partition = size / world_size;
+    //Get process ID
+    int world_rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    //Get processes Number
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    /*unsigned int partition = size / world_size;*/
 
+    double* sendbuff;
+    sendbuff = (double*)malloc(size);
+    double* recvbuff = new double[size];
 
-
-    for (int r = 0; r < world_rank * partition + partition; ++r) {
-        column[r] = equations[r][size];
-        matrix[r].resize(size);
-        for (int c = 0; c < world_rank * partition + partition; ++c) {
+    for (int r = 0; r < size; ++r) {
+        /*if (world_rank == 0) {
+            sendbuff = equations[r][size];
+            MPI_Scatter(sendbuff, size, MPI_DOUBLE, recvbuff, size, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        }*/
+            column[r] = equations[r][size];
+            matrix[r].resize(size);        
+        for (int c = 0; c < size; ++c) {           
             matrix[r][c] = equations[r][c];
             /*std::cout << "From solveCramer" << std::endl;
             std::cout << "matrix " << r << " " << c << " " << matrix[r][c] << "\n" << std::endl;*/
         }
+       
     }
-    MPI_Barrier(MPI_COMM_WORLD);
+    
 
     SubMatrix sm(matrix, column);
     return solveParallel(sm);
