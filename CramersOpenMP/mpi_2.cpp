@@ -6,7 +6,7 @@
 #include <omp.h>
 #include <mpi.h>
 #include <chrono>
-
+#include "./color.hpp"
 
 class SubMatrix {
     const std::vector<std::vector<double>>* source;
@@ -224,9 +224,12 @@ int main(int argc, char* argv[]) {
     start_time = std::chrono::high_resolution_clock::now();
     auto solution = solveCramer(equations);
     end_time = std::chrono::high_resolution_clock::now();
-    std::cout << std::setprecision(16);
-    std::cout << "Serial time taken in seconds: " << std::chrono::duration<double>(end_time - start_time).count() << "s\n";
+    std::cout << std::setprecision(8);
+    double serial_time = std::chrono::duration<double>(end_time - start_time).count();
+    std::cout << "Serial time taken in seconds: " << dye::green(serial_time) << dye::green("s\n");
     std::cout << solution << '\n';
+
+
 
     double start_time_MPI, end_time_MPI;
     MPI_Init(&argc, &argv);
@@ -240,7 +243,14 @@ int main(int argc, char* argv[]) {
     end_time_MPI = MPI_Wtime();
     MPI_Finalize();
 
-    std::cout << "Parallel MPI time taken in seconds: " << end_time_MPI - start_time_MPI << "s\n";
+    double MPI_time = end_time_MPI - start_time_MPI;
+    std::cout << "Parallel MPI time taken in seconds: " << dye::green(MPI_time) << dye::green("s\n");
     std::cout << solution_MPI << '\n';
+
+
+    if (MPI_time > serial_time)
+        std::cout << "Serial is faster than parallel by " << dye::green(MPI_time - serial_time) << dye::green("s\n");
+    else
+        std::cout << "Parallel is faster than serial by " << dye::green(serial_time - MPI_time) << dye::green("s\n");
     return 0;
 }

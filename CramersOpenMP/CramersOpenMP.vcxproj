@@ -21,6 +21,9 @@
   <ItemGroup>
     <ClCompile Include="mpi_2.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="color.hpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
