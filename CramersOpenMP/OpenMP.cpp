@@ -83,37 +83,35 @@ public:
         if (sz == 2) {
             return index(0, 0) * index(1, 1) - index(0, 1) * index(1, 0);
         }
-#pragma omp parallel 
-        {
+
             SubMatrix m(*this);
             int sign = 1;
-#pragma omp for reduction(+:det)
+
             for (int c = 0; c < sz; ++c) {
                 m.columnIndex(c);
                 double d = m.ParallelDet();
                 det += index(0, c) * d * sign;
                 sign = -sign;
             }
-        }
+       
         return det;
     }
 };
 
 std::vector<double> solveParallel(SubMatrix& matrix) {
     std::vector<double> answer(matrix.size());
-#pragma omp parallel shared(answer)
-    {
+
         double det = matrix.ParallelDet();
         if (det == 0.0) {
             throw std::runtime_error("The determinant is zero.");
         }
 
-#pragma omp single
+
         for (int i = 0; i < matrix.size(); ++i) {
             matrix.columnIndex(i);
             answer[i] = matrix.ParallelDet() / det;
         }
-    }
+   
     return answer;
 }
 
@@ -153,7 +151,7 @@ std::vector<double> solveCramer(const std::vector<std::vector<double>>& equation
     }
 
     SubMatrix sm(matrix, column);
-    return solveParallel(sm);
+    return solveSerial(sm);
 }
 
 

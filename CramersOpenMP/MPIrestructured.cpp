@@ -96,7 +96,7 @@ std::vector<double> solveCramer(Matrix& equations) {
     Matrix matrix(size);
     std::vector<double> column(size);
     
-#pragma omp parallel for collapse(2)
+
     for (int r = 0; r < size; ++r) {
         //if (rank == 0) {
         //    column[r] = equations[r][size];//get the answer column
@@ -118,11 +118,14 @@ std::vector<double> solveCramer(Matrix& equations) {
         
     for (int col = 0; col < size; col++)
     {
-        std::vector<std::vector<double>> detX;
-        std::copy(matrix.begin(), matrix.end(), back_inserter(detX));
-        MPI_Scatter(&determinantArray, 1, MPI_DOUBLE, &determinantArray, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        if (rank == 0) {
+            std::vector<std::vector<double>> detX;
+            std::copy(matrix.begin(), matrix.end(), back_inserter(detX));
+            MPI_Scatter(&determinantArray, 1, MPI_DOUBLE, &detX, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        
         for (int row = 0; row < size; row++) {
             detX[row][col] = column[row];
+        }
         }
         determinantArray[col] = det(detX);
         MPI_Allgather(&determinantArray, 1, MPI_DOUBLE, &determinantArray, 4, MPI_DOUBLE, MPI_COMM_WORLD);
