@@ -89,12 +89,12 @@ public:
         SubMatrix m(*this);
         double det = 0.0;
         int sign = 1;
-        parallel_for(size_t(0), sz, [&](size_t c) {
+        for (size_t c = 0; c < sz; ++c) {
             m.columnIndex(c);
-            double d = m.ParallelDet();
+            double d = m.det();
             det += index(0, c) * d * sign;
             sign = -sign;
-            });
+        }
         return det;
     }
 };
@@ -106,10 +106,10 @@ std::vector<double> solveParallel(SubMatrix& matrix) {
     }
 
     std::vector<double> answer(matrix.size());
-    parallel_for(size_t(0), size_t(matrix.size()), [&](size_t i) {
+    for (int i = 0; i < matrix.size(); ++i) {
         matrix.columnIndex(i);
-        answer[i] = matrix.ParallelDet() / det;
-        });
+        answer[i] = matrix.det() / det;
+    }
     return answer;
 }
 
