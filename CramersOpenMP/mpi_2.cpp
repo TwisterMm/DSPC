@@ -126,18 +126,21 @@ std::vector<double> solveCramerParallel(const std::vector<std::vector<double>>& 
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     /*unsigned int partition = size / world_size;*/
 
-    double* sendbuff;
-    sendbuff = (double*)malloc(size);
-    double* recvbuff = new double[size];
+    /*int* sendbuff;    
+    void* recvbuff;*/
+
+    /*int* recvbuff = malloc(int);*/
 
     for (int r = 0; r < size; ++r) {
-        /*if (world_rank == 0) {
-            sendbuff = equations[r][size];
-            MPI_Scatter(sendbuff, size, MPI_DOUBLE, recvbuff, size, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        /*if (world_rank == 0) {            
+            MPI_Scatter(&r, 1, MPI_INT, recvbuff, 1, MPI_INT, 0, MPI_COMM_WORLD);
+            printf(" Processor %d has data %d\n", world_rank, *recvbuff);
         }*/
+        /*if (world_rank !=0 && r % world_rank != world_size) continue;*/
             column[r] = equations[r][size];
             matrix[r].resize(size);        
-        for (int c = 0; c < size; ++c) {           
+        for (int c = 0; c < size; ++c) {   
+            
             matrix[r][c] = equations[r][c];
             /*std::cout << "From solveCramer" << std::endl;
             std::cout << "matrix " << r << " " << c << " " << matrix[r][c] << "\n" << std::endl;*/
