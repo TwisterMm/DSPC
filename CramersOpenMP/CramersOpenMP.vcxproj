@@ -19,10 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="mpi_2.cpp" />
+    <ClInclude Include="color.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="color.hpp" />
+    <ClCompile Include="mpi_2.cpp" />
+    <ClCompile Include="OpenMP.cpp" />
+    <ClCompile Include="OriginalCramer.cpp" />
+    <ClCompile Include="PPL.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

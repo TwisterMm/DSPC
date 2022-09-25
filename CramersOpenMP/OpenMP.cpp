@@ -157,8 +157,6 @@ std::vector<double> solveCramer(const std::vector<std::vector<double>>& equation
     return solveParallel(sm);
 }
 
-
-
 std::vector<double> solveCramerSerial(const std::vector<std::vector<double>>& equations) {
     int size = equations.size();
     if (std::any_of(
@@ -181,8 +179,6 @@ std::vector<double> solveCramerSerial(const std::vector<std::vector<double>>& eq
     SubMatrix sm(matrix, column);
     return solveSerial(sm);
 }
-
-
 
 template<typename T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
@@ -235,9 +231,9 @@ int main() {
     std::cout << solution << '\n' << std::endl;
 
     if (end_time > serial_time)
-        std::cout << "Serial is faster than parallel by " << dye::green(end_time - serial_time) << dye::green("s\n");
+        std::cout << "OpenMP: Serial is faster than parallel by " << dye::green(end_time - serial_time) << dye::green("s\n");
     else
-        std::cout << "Parallel is faster than serial by " << dye::green(serial_time - end_time) << dye::green("s\n");
+        std::cout << "OpenMP: Parallel is faster than serial by " << dye::green(serial_time - end_time) << dye::green("s\n");
 
     return 0;
 }
