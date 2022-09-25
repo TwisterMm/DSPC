@@ -228,9 +228,9 @@ int main() {
     std::cout << solution << '\n' << std::endl;
 
     if (end_time > serial_time)
-        std::cout << "Serial is faster than parallel by " << dye::green(end_time - serial_time) << dye::green("s\n");
+        std::cout << "PPL: Serial is faster than parallel by " << dye::green(end_time - serial_time) << dye::green("s\n");
     else
-        std::cout << "Parallel is faster than serial by " << dye::green(serial_time - end_time) << dye::green("s\n");
+        std::cout << "PPL: Parallel is faster than serial by " << dye::green(serial_time - end_time) << dye::green("s\n");
     
     return 0;
 }

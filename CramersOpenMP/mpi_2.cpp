@@ -257,8 +257,8 @@ int main(int argc, char* argv[]) {
 
 
     if (MPI_time > serial_time)
-        std::cout << "Serial is faster than parallel by " << dye::green(MPI_time - serial_time) << dye::green("s\n");
+        std::cout << "MPI: Serial is faster than parallel by " << dye::green(MPI_time - serial_time) << dye::green("s\n");
     else
-        std::cout << "Parallel is faster than serial by " << dye::green(serial_time - MPI_time) << dye::green("s\n");
+        std::cout << "MPI: Parallel is faster than serial by " << dye::green(serial_time - MPI_time) << dye::green("s\n");
     return 0;
 }
