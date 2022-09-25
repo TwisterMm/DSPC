@@ -1,3 +1,4 @@
+
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -86,14 +87,14 @@ public:
 
             SubMatrix m(*this);
             int sign = 1;
-
+#pragma omp parallel for reduction(+:det) shared(m,sign)
             for (int c = 0; c < sz; ++c) {
                 m.columnIndex(c);
                 double d = m.ParallelDet();
                 det += index(0, c) * d * sign;
                 sign = -sign;
             }
-       
+        
         return det;
     }
 };
@@ -101,17 +102,19 @@ public:
 std::vector<double> solveParallel(SubMatrix& matrix) {
     std::vector<double> answer(matrix.size());
 
-        double det = matrix.ParallelDet();
+        double det = 1;
+        det = matrix.det();
         if (det == 0.0) {
             throw std::runtime_error("The determinant is zero.");
         }
 
-
         for (int i = 0; i < matrix.size(); ++i) {
             matrix.columnIndex(i);
-            answer[i] = matrix.ParallelDet() / det;
+            answer[i] = matrix.det() / det;
         }
-   
+    
+        
+    
     return answer;
 }
 
@@ -151,7 +154,7 @@ std::vector<double> solveCramer(const std::vector<std::vector<double>>& equation
     }
 
     SubMatrix sm(matrix, column);
-    return solveSerial(sm);
+    return solveParallel(sm);
 }
 
 
@@ -199,7 +202,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
 
 int main() {
     double start_time, end_time;
-    
+
     std::vector<std::vector<double>> equations = {
         {1 ,7 ,2 ,3 ,9 ,5 ,7 ,5 ,9 ,8},
         {4 ,1 ,2 ,2 ,5 ,9 ,1 ,2 ,7 ,5},
@@ -211,7 +214,7 @@ int main() {
         {1 ,6 ,5 ,5 ,1 ,9 ,3 ,7 ,2 ,7},
         {3 ,5 ,8 ,3 ,6 ,5 ,5 ,4 ,5 ,1},
     };
-    
+
 
 
 
@@ -235,6 +238,6 @@ int main() {
         std::cout << "Serial is faster than parallel by " << dye::green(end_time - serial_time) << dye::green("s\n");
     else
         std::cout << "Parallel is faster than serial by " << dye::green(serial_time - end_time) << dye::green("s\n");
-        
+
     return 0;
 }
