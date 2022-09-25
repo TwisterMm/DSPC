@@ -220,10 +220,18 @@ int main(int argc, char* argv[]) {
         {3 ,5 ,8 ,3 ,6 ,5 ,5 ,4 ,5 ,1},
     };
 
-    std::chrono::time_point<std::chrono::high_resolution_clock> start_time, end_time;
+    /*std::chrono::time_point<std::chrono::high_resolution_clock> start_time, end_time;
     start_time = std::chrono::high_resolution_clock::now();
     auto solution = solveCramer(equations);
-    end_time = std::chrono::high_resolution_clock::now();
+    end_time = std::chrono::high_resolution_clock::now();*/
+
+    MPI_Init(&argc, &argv);
+    double start_time, end_time;
+    start_time = MPI_Wtime();
+    auto solution = solveCramer(equations);
+    end_time = MPI_Wtime();   
+
+
     std::cout << std::setprecision(8);
     double serial_time = std::chrono::duration<double>(end_time - start_time).count();
     std::cout << "Serial time taken in seconds: " << dye::green(serial_time) << dye::green("s\n");
@@ -232,7 +240,7 @@ int main(int argc, char* argv[]) {
 
 
     double start_time_MPI, end_time_MPI;
-    MPI_Init(&argc, &argv);
+    
     //Get process ID
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
